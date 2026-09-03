@@ -62,6 +62,23 @@ def test_signup_for_unknown_activity_returns_not_found():
     assert response.json() == {"detail": "Activity not found"}
 
 
+def test_signup_rejects_existing_participant():
+    activity_name = "Chess Club"
+    email = activities[activity_name]["participants"][0]
+    participant_count = activities[activity_name]["participants"].count(email)
+
+    response = client.post(
+        f"/activities/{activity_name}/signup",
+        params={"email": email},
+    )
+
+    assert response.status_code == 400
+    assert response.json() == {
+        "detail": "Student is already signed up for this activity"
+    }
+    assert activities[activity_name]["participants"].count(email) == participant_count
+
+
 def test_unregister_removes_participant():
     activity_name = "Basketball Team"
     email = "unregister-test@mergington.edu"
